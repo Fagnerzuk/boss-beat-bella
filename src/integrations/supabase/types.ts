@@ -14,7 +14,111 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achievement_key: string
+          id: string
+          session_id: string
+          unlocked_at: string
+        }
+        Insert: {
+          achievement_key: string
+          id?: string
+          session_id: string
+          unlocked_at?: string
+        }
+        Update: {
+          achievement_key?: string
+          id?: string
+          session_id?: string
+          unlocked_at?: string
+        }
+        Relationships: []
+      }
+      game_runs: {
+        Row: {
+          boss_key: string
+          created_at: string
+          duration_seconds: number
+          id: string
+          session_id: string
+          victory: boolean
+        }
+        Insert: {
+          boss_key: string
+          created_at?: string
+          duration_seconds: number
+          id?: string
+          session_id: string
+          victory: boolean
+        }
+        Update: {
+          boss_key?: string
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          session_id?: string
+          victory?: boolean
+        }
+        Relationships: []
+      }
+      leaderboard: {
+        Row: {
+          id: string
+          max_stage: number
+          player_name: string
+          session_id: string
+          total_time_seconds: number
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          max_stage?: number
+          player_name: string
+          session_id: string
+          total_time_seconds?: number
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          max_stage?: number
+          player_name?: string
+          session_id?: string
+          total_time_seconds?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      player_progress: {
+        Row: {
+          bosses_defeated: number
+          created_at: string
+          current_stage: number
+          id: string
+          player_name: string
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          bosses_defeated?: number
+          created_at?: string
+          current_stage?: number
+          id?: string
+          player_name?: string
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          bosses_defeated?: number
+          created_at?: string
+          current_stage?: number
+          id?: string
+          player_name?: string
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
