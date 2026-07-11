@@ -434,6 +434,10 @@ export class GameEngine {
     ctx.fillStyle = "#39204d";
     ctx.fillRect(0, GROUND_Y, WORLD_W, 4);
 
+    // NPCs de cenário
+    this.drawIronMan();
+    this.drawSpiderPunk();
+
     // boss
     this.drawBoss();
     // player
@@ -457,6 +461,82 @@ export class GameEngine {
       ctx.lineWidth = 3;
       ctx.strokeRect(this.player.x - 4, this.player.y - 4, this.player.w + 8, this.player.h + 8);
     }
+  }
+
+  drawIronMan() {
+    const ctx = this.ctx;
+    const t = performance.now() / 500;
+    const x = WORLD_W - 90 + Math.sin(t) * 6;
+    const y = 60 + Math.cos(t) * 4;
+    // corpo vermelho
+    ctx.fillStyle = "#b71c1c";
+    ctx.fillRect(x, y + 10, 26, 26);
+    // capacete
+    ctx.fillStyle = "#d4a017";
+    ctx.fillRect(x + 4, y, 18, 14);
+    // olhos brilhando
+    ctx.fillStyle = "#e0f7ff";
+    ctx.fillRect(x + 7, y + 5, 4, 3);
+    ctx.fillRect(x + 15, y + 5, 4, 3);
+    // pernas
+    ctx.fillStyle = "#b71c1c";
+    ctx.fillRect(x + 4, y + 36, 8, 12);
+    ctx.fillRect(x + 14, y + 36, 8, 12);
+    // repulsor flames
+    ctx.fillStyle = "rgba(80,180,255,0.8)";
+    ctx.beginPath(); ctx.arc(x + 8, y + 50, 3 + Math.sin(t*4), 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x + 18, y + 50, 3 + Math.cos(t*4), 0, Math.PI*2); ctx.fill();
+    // label
+    ctx.fillStyle = "#ffd54a";
+    ctx.font = "bold 8px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("IRON MAN", x + 13, y - 3);
+  }
+
+  drawSpiderPunk() {
+    const ctx = this.ctx;
+    const t = performance.now() / 400;
+    const x = 40;
+    const y = 80;
+    // raios dos lados
+    ctx.strokeStyle = "#ffe600";
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const off = Math.sin(t + i) * 3;
+      ctx.beginPath();
+      ctx.moveTo(x - 8, y + i*14 + off);
+      ctx.lineTo(x - 2, y + i*14 + 6 + off);
+      ctx.lineTo(x - 6, y + i*14 + 8 + off);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + 30, y + i*14 + off);
+      ctx.lineTo(x + 24, y + i*14 + 6 + off);
+      ctx.lineTo(x + 28, y + i*14 + 8 + off);
+      ctx.stroke();
+    }
+    // corpo preto com detalhes vermelhos (moicano)
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(x, y + 8, 24, 30);
+    // moicano vermelho
+    ctx.fillStyle = "#ff1744";
+    ctx.fillRect(x + 10, y - 4, 4, 12);
+    ctx.fillRect(x + 8, y - 2, 8, 6);
+    // cabeça (máscara aranha)
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(x + 4, y + 2, 16, 12);
+    // olhos brancos angulares
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(x + 6, y + 6, 5, 3);
+    ctx.fillRect(x + 13, y + 6, 5, 3);
+    // pernas
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(x + 3, y + 38, 7, 10);
+    ctx.fillRect(x + 14, y + 38, 7, 10);
+    // label
+    ctx.fillStyle = "#ff1744";
+    ctx.font = "bold 8px system-ui";
+    ctx.textAlign = "center";
+    ctx.fillText("SPIDER-PUNK", x + 12, y - 8);
   }
 
   drawPlayer() {
