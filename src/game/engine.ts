@@ -25,6 +25,13 @@ interface Entity {
 
 interface Projectile { x: number; y: number; vx: number; vy: number; r: number; damage: number; from: "boss" | "player"; }
 
+interface HitFx {
+  x: number; y: number;
+  age: number; life: number;
+  color: string; label?: string;
+  particles: { vx: number; vy: number; size: number }[];
+}
+
 const GRAVITY = 0.6;
 const GROUND_Y = 360; // top of ground
 const WORLD_W = 800;
