@@ -288,6 +288,14 @@ export class GameEngine {
       if (p.from === "boss") p.vy += 0.2;
     }
     this.projectiles = this.projectiles.filter(p => p.x > -20 && p.x < WORLD_W + 20 && p.y < GROUND_Y + 10);
+
+    // hit fx update
+    for (const fx of this.hitFx) {
+      fx.age += dt;
+      for (const pa of fx.particles) { pa.vx *= 0.94; pa.vy += 0.35; }
+    }
+    this.hitFx = this.hitFx.filter(fx => fx.age < fx.life);
+
     // proj hits player
     for (const p of this.projectiles) {
       if (p.from !== "boss") continue;
