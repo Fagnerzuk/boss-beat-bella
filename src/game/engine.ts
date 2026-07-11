@@ -25,6 +25,13 @@ interface Entity {
 
 interface Projectile { x: number; y: number; vx: number; vy: number; r: number; damage: number; from: "boss" | "player"; }
 
+interface HitFx {
+  x: number; y: number;
+  age: number; life: number;
+  color: string; label?: string;
+  particles: { vx: number; vy: number; size: number }[];
+}
+
 const GRAVITY = 0.6;
 const GROUND_Y = 360; // top of ground
 const WORLD_W = 800;
@@ -59,6 +66,9 @@ export class GameEngine {
   player: Entity = this.makePlayer();
   bossEnt!: Entity;
   projectiles: Projectile[] = [];
+  hitFx: HitFx[] = [];
+  debug = false;
+  playerAttackRange = 70;
 
   keys: Record<string, boolean> = {};
   controlsLocked = true;
@@ -115,6 +125,7 @@ export class GameEngine {
         if (e.key === "3") this.useSpecial("sentido_aranha");
         if (e.key === "4") this.useSpecial("resistente");
       }
+      if (e.key.toLowerCase() === "b") this.debug = !this.debug;
     };
     const up = (e: KeyboardEvent) => { this.keys[e.key.toLowerCase()] = false; };
     window.addEventListener("keydown", down);
@@ -133,6 +144,7 @@ export class GameEngine {
   }
   triggerDialogueNext() { if (this.phase === "intro") this.advanceDialogue(); }
   triggerSpecial(s: SpecialKey) { if (this.phase === "combat") this.useSpecial(s); }
+  toggleDebug() { this.debug = !this.debug; return this.debug; }
 
   loadStage(i: number) {
     if (i >= BOSSES.length) {
@@ -211,9 +223,11 @@ export class GameEngine {
   dealDamageToBossIfClose(dmg: number, range: number) {
     const dx = Math.abs(this.player.x + this.player.w / 2 - (this.bossEnt.x + this.bossEnt.w / 2));
     const dy = Math.abs(this.player.y - this.bossEnt.y);
+    this.playerAttackRange = range;
     if (dx < range && dy < 120) {
       this.bossEnt.hp -= dmg;
       this.bossEnt.hitFlash = 200;
+      this.spawnHitFx(this.bossEnt.x + this.bossEnt.w/2, this.bossEnt.y + this.bossEnt.h/2, "#fff2a8", dmg);
       this.cb.onHpChange(this.player.hp, Math.max(0, this.bossEnt.hp), this.bossEnt.maxHp);
     }
   }
@@ -274,6 +288,14 @@ export class GameEngine {
       if (p.from === "boss") p.vy += 0.2;
     }
     this.projectiles = this.projectiles.filter(p => p.x > -20 && p.x < WORLD_W + 20 && p.y < GROUND_Y + 10);
+
+    // hit fx update
+    for (const fx of this.hitFx) {
+      fx.age += dt;
+      for (const pa of fx.particles) { pa.vx *= 0.94; pa.vy += 0.35; }
+    }
+    this.hitFx = this.hitFx.filter(fx => fx.age < fx.life);
+
     // proj hits player
     for (const p of this.projectiles) {
       if (p.from !== "boss") continue;
@@ -398,7 +420,19 @@ export class GameEngine {
     if (this.resistenteActive > 0) dmg = Math.floor(dmg * 0.5);
     this.player.hp = Math.max(0, this.player.hp - dmg);
     this.player.hitFlash = 250;
+    this.spawnHitFx(this.player.x + this.player.w/2, this.player.y + this.player.h/2, "#ff5c7a", dmg);
     this.cb.onHpChange(this.player.hp, this.bossEnt.hp, this.bossEnt.maxHp);
+  }
+
+  spawnHitFx(x: number, y: number, color: string, dmg: number) {
+    const parts: HitFx["particles"] = [];
+    const n = 10;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 2 + Math.random() * 5;
+      parts.push({ vx: Math.cos(a)*s, vy: Math.sin(a)*s - 1.5, size: 2 + Math.random()*3 });
+    }
+    this.hitFx.push({ x, y, age: 0, life: 550, color, label: `-${dmg}`, particles: parts });
   }
 
   winStage() {
@@ -497,6 +531,82 @@ export class GameEngine {
       ctx.lineWidth = 3;
       ctx.strokeRect(this.player.x - 4, this.player.y - 4, this.player.w + 8, this.player.h + 8);
     }
+
+    // Hit VFX
+    this.drawHitFx();
+
+    // Debug overlay
+    if (this.debug) this.drawDebug();
+  }
+
+  drawHitFx() {
+    const ctx = this.ctx;
+    for (const fx of this.hitFx) {
+      const t = fx.age / fx.life;         // 0..1
+      const alpha = 1 - t;
+      // shockwave ring
+      const r = 8 + t * 40;
+      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.8})`;
+      ctx.lineWidth = 3 * (1 - t);
+      ctx.beginPath(); ctx.arc(fx.x, fx.y, r, 0, Math.PI*2); ctx.stroke();
+      // colored inner burst
+      ctx.fillStyle = fx.color;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.arc(fx.x, fx.y, Math.max(2, 14 * (1 - t)), 0, Math.PI*2); ctx.fill();
+      // particles
+      for (const pa of fx.particles) {
+        const px = fx.x + pa.vx * (fx.age / 16);
+        const py = fx.y + pa.vy * (fx.age / 16);
+        ctx.fillRect(px, py, pa.size, pa.size);
+      }
+      ctx.globalAlpha = 1;
+      // damage number floats up
+      if (fx.label) {
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.strokeStyle = `rgba(0,0,0,${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.font = "bold 16px system-ui";
+        ctx.textAlign = "center";
+        const ly = fx.y - 20 - t * 30;
+        ctx.strokeText(fx.label, fx.x, ly);
+        ctx.fillText(fx.label, fx.x, ly);
+      }
+    }
+  }
+
+  drawDebug() {
+    const ctx = this.ctx;
+    const p = this.player, b = this.bossEnt;
+    // player hitbox
+    ctx.strokeStyle = "#00ff88";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(p.x, p.y, p.w, p.h);
+    // boss hitbox
+    ctx.strokeStyle = "#ff5566";
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+    // player attack range circle around player center
+    const pcx = p.x + p.w/2, pcy = p.y + p.h/2;
+    ctx.strokeStyle = "rgba(0,255,136,0.5)";
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.arc(pcx, pcy, this.playerAttackRange, 0, Math.PI*2); ctx.stroke();
+    // line to boss + dx
+    const bcx = b.x + b.w/2, bcy = b.y + b.h/2;
+    const dxv = Math.abs(pcx - bcx);
+    const dyv = Math.abs(p.y - b.y);
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.beginPath(); ctx.moveTo(pcx, pcy); ctx.lineTo(bcx, bcy); ctx.stroke();
+    ctx.setLineDash([]);
+    // stats
+    ctx.fillStyle = "#000";
+    ctx.fillRect(6, 6, 200, 76);
+    ctx.fillStyle = "#0f8";
+    ctx.font = "11px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(`DEBUG (B)`, 12, 20);
+    ctx.fillText(`player  x=${p.x.toFixed(0)} y=${p.y.toFixed(0)} hp=${p.hp}`, 12, 34);
+    ctx.fillText(`boss    x=${b.x.toFixed(0)} y=${b.y.toFixed(0)} hp=${b.hp}`, 12, 48);
+    ctx.fillText(`dx=${dxv.toFixed(0)} dy=${dyv.toFixed(0)} range=${this.playerAttackRange}`, 12, 62);
+    ctx.fillText(`atkCd=${this.attackCooldown.toFixed(0)} bossCd=${this.bossAttackTimer.toFixed(0)}`, 12, 76);
   }
 
   drawIronMan() {

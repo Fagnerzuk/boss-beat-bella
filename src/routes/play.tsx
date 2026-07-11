@@ -33,6 +33,8 @@ function PlayPage() {
   const combatStartRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [muted, setMuted] = useState(false);
+  const [debug, setDebug] = useState(false);
+  const [bootError, setBootError] = useState<string | null>(null);
 
   // Toca a música do estágio quando o combate começa
   useEffect(() => {
@@ -51,7 +53,9 @@ function PlayPage() {
   useEffect(() => {
     ensureProgress();
     if (!canvasRef.current) return;
-    const engine = new GameEngine(canvasRef.current, {
+    let engine: GameEngine;
+    try {
+      engine = new GameEngine(canvasRef.current, {
       onPhaseChange: (p) => {
         setPhase(p);
         if (p === "combat") combatStartRef.current = performance.now();
@@ -85,9 +89,14 @@ function PlayPage() {
         setTimeout(() => setCheer((c) => (c && c.text === text ? null : c)), 4000);
       },
       onSpecialsChange: (s) => setSpecials(s),
-    });
-    engineRef.current = engine;
-    return () => { engine.destroy(); engineRef.current = null; };
+      });
+      engineRef.current = engine;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("GameEngine boot failed", e);
+      setBootError(msg);
+    }
+    return () => { engineRef.current?.destroy(); engineRef.current = null; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -129,6 +138,17 @@ function PlayPage() {
           height={WORLD_H}
           className="w-full h-full block"
         />
+
+        {bootError && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center bg-black/90">
+            <h3 className="text-lg font-bold text-[#ff3859]">Falha ao iniciar o jogo</h3>
+            <p className="text-xs text-purple-200 break-all">{bootError}</p>
+            <button
+              onClick={() => location.reload()}
+              className="mt-2 rounded-lg bg-[#ff3859] px-4 py-2 text-sm font-bold"
+            >Recarregar</button>
+          </div>
+        )}
 
         {/* Dialogue overlay */}
         {phase === "intro" && dialogue && (
@@ -263,12 +283,21 @@ function PlayPage() {
       </p>
 
       <audio ref={audioRef} muted={muted} preload="none" />
-      <button
-        onClick={() => setMuted(m => !m)}
-        className="fixed bottom-3 right-3 rounded-full bg-black/70 border border-purple-500 text-white px-3 py-2 text-xs"
-      >
-        {muted ? "🔇 Som" : "🔊 Som"}
-      </button>
+      <div className="fixed bottom-3 right-3 flex flex-col gap-2">
+        <button
+          onClick={() => setMuted(m => !m)}
+          className="rounded-full bg-black/70 border border-purple-500 text-white px-3 py-2 text-xs"
+        >
+          {muted ? "🔇 Som" : "🔊 Som"}
+        </button>
+        <button
+          onClick={() => { const on = engineRef.current?.toggleDebug() ?? false; setDebug(on); }}
+          className={`rounded-full border px-3 py-2 text-xs ${debug ? "bg-[#00ff88] text-black border-[#00ff88]" : "bg-black/70 border-purple-500 text-white"}`}
+          title="Tecla B também alterna"
+        >
+          🐞 Debug {debug ? "ON" : "OFF"}
+        </button>
+      </div>
     </div>
   );
 }
