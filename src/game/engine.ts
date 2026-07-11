@@ -30,6 +30,21 @@ const GROUND_Y = 360; // top of ground
 const WORLD_W = 800;
 const WORLD_H = 420;
 
+const IRON_CHEERS = [
+  "Continue, Bella! Você consegue!",
+  "Isso! Mantém o ritmo, garota!",
+  "Foco no alvo, Bella. Estou vendo daqui!",
+  "Nada de desistir agora, você é fera!",
+  "Respira e revida — eu acredito em você!",
+];
+const PUNK_CHEERS = [
+  "Sem medo! Esse vilão não é páreo pra você!",
+  "Vai com tudo, Bella! Faz barulho!",
+  "Ritmo, ritmo! Cada golpe conta!",
+  "Levanta, quebra tudo, vira o jogo!",
+  "Tu é lenda, Bella! Manda ver!",
+];
+
 export class GameEngine {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
