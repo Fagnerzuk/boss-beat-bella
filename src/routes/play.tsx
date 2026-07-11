@@ -31,6 +31,21 @@ function PlayPage() {
   const [tip, setTip] = useState<string | null>(null);
   const combatStartRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [muted, setMuted] = useState(false);
+
+  // Toca a música do estágio quando o combate começa
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !boss) return;
+    if (phase === "combat" && boss.musicUrl) {
+      if (audio.src !== boss.musicUrl) audio.src = boss.musicUrl;
+      audio.loop = true;
+      audio.volume = 0.35;
+      audio.play().catch(() => { /* autoplay pode ser bloqueado até 1º clique */ });
+    } else {
+      audio.pause();
+    }
+  }, [phase, boss]);
 
   useEffect(() => {
     ensureProgress();
@@ -227,6 +242,14 @@ function PlayPage() {
       <p className="text-[10px] text-purple-400 mt-2 px-3 text-center max-w-[800px]">
         🎵 Música do estágio: <em>{boss?.song}</em> — adicione seus arquivos de áudio para tocá-los.
       </p>
+
+      <audio ref={audioRef} muted={muted} preload="none" />
+      <button
+        onClick={() => setMuted(m => !m)}
+        className="fixed bottom-3 right-3 rounded-full bg-black/70 border border-purple-500 text-white px-3 py-2 text-xs"
+      >
+        {muted ? "🔇 Som" : "🔊 Som"}
+      </button>
     </div>
   );
 }

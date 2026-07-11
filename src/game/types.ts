@@ -21,6 +21,8 @@ export interface BossConfig {
   damage: number;
   attackCooldown: number;
   song: string;
+  /** URL do MP3 tocado em loop no combate. Troque pelos seus arquivos. */
+  musicUrl?: string;
   tip: string;
   intro: { speaker: "bella" | "boss"; text: string }[];
   /** descoberta que aparece ao derrotar */
