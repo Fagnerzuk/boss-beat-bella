@@ -223,9 +223,11 @@ export class GameEngine {
   dealDamageToBossIfClose(dmg: number, range: number) {
     const dx = Math.abs(this.player.x + this.player.w / 2 - (this.bossEnt.x + this.bossEnt.w / 2));
     const dy = Math.abs(this.player.y - this.bossEnt.y);
+    this.playerAttackRange = range;
     if (dx < range && dy < 120) {
       this.bossEnt.hp -= dmg;
       this.bossEnt.hitFlash = 200;
+      this.spawnHitFx(this.bossEnt.x + this.bossEnt.w/2, this.bossEnt.y + this.bossEnt.h/2, "#fff2a8", dmg);
       this.cb.onHpChange(this.player.hp, Math.max(0, this.bossEnt.hp), this.bossEnt.maxHp);
     }
   }
@@ -410,7 +412,19 @@ export class GameEngine {
     if (this.resistenteActive > 0) dmg = Math.floor(dmg * 0.5);
     this.player.hp = Math.max(0, this.player.hp - dmg);
     this.player.hitFlash = 250;
+    this.spawnHitFx(this.player.x + this.player.w/2, this.player.y + this.player.h/2, "#ff5c7a", dmg);
     this.cb.onHpChange(this.player.hp, this.bossEnt.hp, this.bossEnt.maxHp);
+  }
+
+  spawnHitFx(x: number, y: number, color: string, dmg: number) {
+    const parts: HitFx["particles"] = [];
+    const n = 10;
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const s = 2 + Math.random() * 5;
+      parts.push({ vx: Math.cos(a)*s, vy: Math.sin(a)*s - 1.5, size: 2 + Math.random()*3 });
+    }
+    this.hitFx.push({ x, y, age: 0, life: 550, color, label: `-${dmg}`, particles: parts });
   }
 
   winStage() {
