@@ -11,6 +11,7 @@ export interface GameCallbacks {
   onAchievement: (key: AchievementKey) => void;
   onSpiderTip: (tip: string) => void;
   onSpecialsChange: (unlocked: SpecialKey[]) => void;
+  onNpcCheer?: (speaker: "iron" | "punk", text: string) => void;
 }
 
 interface Entity {
@@ -28,6 +29,21 @@ const GRAVITY = 0.6;
 const GROUND_Y = 360; // top of ground
 const WORLD_W = 800;
 const WORLD_H = 420;
+
+const IRON_CHEERS = [
+  "Continue, Bella! Você consegue!",
+  "Isso! Mantém o ritmo, garota!",
+  "Foco no alvo, Bella. Estou vendo daqui!",
+  "Nada de desistir agora, você é fera!",
+  "Respira e revida — eu acredito em você!",
+];
+const PUNK_CHEERS = [
+  "Sem medo! Esse vilão não é páreo pra você!",
+  "Vai com tudo, Bella! Faz barulho!",
+  "Ritmo, ritmo! Cada golpe conta!",
+  "Levanta, quebra tudo, vira o jogo!",
+  "Tu é lenda, Bella! Manda ver!",
+];
 
 export class GameEngine {
   canvas: HTMLCanvasElement;
@@ -62,6 +78,9 @@ export class GameEngine {
   dialogueIndex = 0;
   combatStartedAt = 0;
   achievements = new Set<AchievementKey>();
+
+  npcCheerTimer = 10000;
+  lastCheerSpeaker: "iron" | "punk" = "punk";
 
   firstBossDefeated = false;
 
@@ -269,6 +288,17 @@ export class GameEngine {
     // win/lose
     if (this.bossEnt.hp <= 0 && this.phase === "combat") this.winStage();
     if (this.player.hp <= 0 && this.phase === "combat") this.lose();
+
+    // NPCs incentivam a Bella a cada 10s
+    this.npcCheerTimer -= dt;
+    if (this.npcCheerTimer <= 0) {
+      this.npcCheerTimer = 10000;
+      const speaker: "iron" | "punk" = this.lastCheerSpeaker === "punk" ? "iron" : "punk";
+      this.lastCheerSpeaker = speaker;
+      const pool = speaker === "iron" ? IRON_CHEERS : PUNK_CHEERS;
+      const text = pool[Math.floor(Math.random() * pool.length)];
+      this.cb.onNpcCheer?.(speaker, text);
+    }
   }
 
   runBossAI(dt: number) {
@@ -312,10 +342,16 @@ export class GameEngine {
           // big leap
           b.vy = -16; b.vx = Math.sign(dx) * 7; b.onGround = false;
         }
-        if (!b.onGround) { b.vy += GRAVITY; b.y += b.vy; b.x += b.vx; }
-        if (b.y + b.h >= GROUND_Y) {
-          b.y = GROUND_Y - b.h; b.vy = 0; b.onGround = true;
-          if (Math.abs(dx) < 80) this.tryHitPlayer(this.boss.damage, 90);
+        if (!b.onGround) {
+          b.vy += GRAVITY; b.y += b.vy; b.x += b.vx;
+          if (b.y + b.h >= GROUND_Y) {
+            b.y = GROUND_Y - b.h; b.vy = 0; b.onGround = true;
+            // Impacto único no pouso: tira 1/5 da vida máxima da Bella
+            if (Math.abs(dx) < 90) {
+              const slam = Math.ceil(this.player.maxHp / 5);
+              this.hitPlayer(slam);
+            }
+          }
         }
         break;
       }
