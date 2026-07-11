@@ -531,6 +531,82 @@ export class GameEngine {
       ctx.lineWidth = 3;
       ctx.strokeRect(this.player.x - 4, this.player.y - 4, this.player.w + 8, this.player.h + 8);
     }
+
+    // Hit VFX
+    this.drawHitFx();
+
+    // Debug overlay
+    if (this.debug) this.drawDebug();
+  }
+
+  drawHitFx() {
+    const ctx = this.ctx;
+    for (const fx of this.hitFx) {
+      const t = fx.age / fx.life;         // 0..1
+      const alpha = 1 - t;
+      // shockwave ring
+      const r = 8 + t * 40;
+      ctx.strokeStyle = `rgba(255,255,255,${alpha * 0.8})`;
+      ctx.lineWidth = 3 * (1 - t);
+      ctx.beginPath(); ctx.arc(fx.x, fx.y, r, 0, Math.PI*2); ctx.stroke();
+      // colored inner burst
+      ctx.fillStyle = fx.color;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.arc(fx.x, fx.y, Math.max(2, 14 * (1 - t)), 0, Math.PI*2); ctx.fill();
+      // particles
+      for (const pa of fx.particles) {
+        const px = fx.x + pa.vx * (fx.age / 16);
+        const py = fx.y + pa.vy * (fx.age / 16);
+        ctx.fillRect(px, py, pa.size, pa.size);
+      }
+      ctx.globalAlpha = 1;
+      // damage number floats up
+      if (fx.label) {
+        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+        ctx.strokeStyle = `rgba(0,0,0,${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.font = "bold 16px system-ui";
+        ctx.textAlign = "center";
+        const ly = fx.y - 20 - t * 30;
+        ctx.strokeText(fx.label, fx.x, ly);
+        ctx.fillText(fx.label, fx.x, ly);
+      }
+    }
+  }
+
+  drawDebug() {
+    const ctx = this.ctx;
+    const p = this.player, b = this.bossEnt;
+    // player hitbox
+    ctx.strokeStyle = "#00ff88";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(p.x, p.y, p.w, p.h);
+    // boss hitbox
+    ctx.strokeStyle = "#ff5566";
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+    // player attack range circle around player center
+    const pcx = p.x + p.w/2, pcy = p.y + p.h/2;
+    ctx.strokeStyle = "rgba(0,255,136,0.5)";
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.arc(pcx, pcy, this.playerAttackRange, 0, Math.PI*2); ctx.stroke();
+    // line to boss + dx
+    const bcx = b.x + b.w/2, bcy = b.y + b.h/2;
+    const dxv = Math.abs(pcx - bcx);
+    const dyv = Math.abs(p.y - b.y);
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.beginPath(); ctx.moveTo(pcx, pcy); ctx.lineTo(bcx, bcy); ctx.stroke();
+    ctx.setLineDash([]);
+    // stats
+    ctx.fillStyle = "#000";
+    ctx.fillRect(6, 6, 200, 76);
+    ctx.fillStyle = "#0f8";
+    ctx.font = "11px monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(`DEBUG (B)`, 12, 20);
+    ctx.fillText(`player  x=${p.x.toFixed(0)} y=${p.y.toFixed(0)} hp=${p.hp}`, 12, 34);
+    ctx.fillText(`boss    x=${b.x.toFixed(0)} y=${b.y.toFixed(0)} hp=${b.hp}`, 12, 48);
+    ctx.fillText(`dx=${dxv.toFixed(0)} dy=${dyv.toFixed(0)} range=${this.playerAttackRange}`, 12, 62);
+    ctx.fillText(`atkCd=${this.attackCooldown.toFixed(0)} bossCd=${this.bossAttackTimer.toFixed(0)}`, 12, 76);
   }
 
   drawIronMan() {
