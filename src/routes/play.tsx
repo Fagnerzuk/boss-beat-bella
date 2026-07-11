@@ -29,6 +29,7 @@ function PlayPage() {
   const [specials, setSpecials] = useState<SpecialKey[]>([]);
   const [achToast, setAchToast] = useState<{ title: string; remaining: number} | null>(null);
   const [tip, setTip] = useState<string | null>(null);
+  const [cheer, setCheer] = useState<{ speaker: "iron" | "punk"; text: string } | null>(null);
   const combatStartRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [muted, setMuted] = useState(false);
@@ -78,6 +79,10 @@ function PlayPage() {
       onSpiderTip: (t) => {
         setTip(t);
         setTimeout(() => setTip(null), 4500);
+      },
+      onNpcCheer: (speaker, text) => {
+        setCheer({ speaker, text });
+        setTimeout(() => setCheer((c) => (c && c.text === text ? null : c)), 4000);
       },
       onSpecialsChange: (s) => setSpecials(s),
     });
@@ -147,6 +152,20 @@ function PlayPage() {
           <div className="absolute top-3 left-3 right-3 rounded-md border border-yellow-400 bg-black/85 p-2 animate-in fade-in slide-in-from-top">
             <div className="text-[10px] font-bold text-yellow-300">⚡ SPIDER-PUNK ⚡</div>
             <div className="text-xs md:text-sm">{tip}</div>
+          </div>
+        )}
+
+        {/* Frase motivacional dos NPCs */}
+        {cheer && phase === "combat" && (
+          <div
+            className={`absolute ${cheer.speaker === "iron" ? "top-16 right-3" : "top-16 left-3"} max-w-[55%] rounded-md border-2 p-2 bg-black/85 animate-in fade-in ${
+              cheer.speaker === "iron" ? "border-[#d4a017]" : "border-[#ff1744]"
+            }`}
+          >
+            <div className={`text-[10px] font-bold ${cheer.speaker === "iron" ? "text-[#ffd54a]" : "text-[#ff5c7a]"}`}>
+              {cheer.speaker === "iron" ? "🤖 IRON MAN" : "⚡ SPIDER-PUNK"}
+            </div>
+            <div className="text-xs md:text-sm">{cheer.text}</div>
           </div>
         )}
 
