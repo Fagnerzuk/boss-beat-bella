@@ -66,6 +66,9 @@ export class GameEngine {
   player: Entity = this.makePlayer();
   bossEnt!: Entity;
   projectiles: Projectile[] = [];
+  hitFx: HitFx[] = [];
+  debug = false;
+  playerAttackRange = 70;
 
   keys: Record<string, boolean> = {};
   controlsLocked = true;
@@ -122,6 +125,7 @@ export class GameEngine {
         if (e.key === "3") this.useSpecial("sentido_aranha");
         if (e.key === "4") this.useSpecial("resistente");
       }
+      if (e.key.toLowerCase() === "b") this.debug = !this.debug;
     };
     const up = (e: KeyboardEvent) => { this.keys[e.key.toLowerCase()] = false; };
     window.addEventListener("keydown", down);
@@ -140,6 +144,7 @@ export class GameEngine {
   }
   triggerDialogueNext() { if (this.phase === "intro") this.advanceDialogue(); }
   triggerSpecial(s: SpecialKey) { if (this.phase === "combat") this.useSpecial(s); }
+  toggleDebug() { this.debug = !this.debug; return this.debug; }
 
   loadStage(i: number) {
     if (i >= BOSSES.length) {
