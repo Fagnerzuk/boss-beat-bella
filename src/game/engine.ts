@@ -230,6 +230,7 @@ export class GameEngine {
       this.bossEnt.hp -= dmg;
       this.bossEnt.hitFlash = 200;
       this.spawnHitFx(this.bossEnt.x + this.bossEnt.w/2, this.bossEnt.y + this.bossEnt.h/2, "#fff2a8", dmg);
+      playHit("boss");
       this.cb.onHpChange(this.player.hp, Math.max(0, this.bossEnt.hp), this.bossEnt.maxHp);
     }
   }
