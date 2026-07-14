@@ -4,6 +4,7 @@ import { GameEngine, WORLD_W, WORLD_H, type GamePhase } from "@/game/engine";
 import type { AchievementKey, BossConfig, SpecialKey } from "@/game/types";
 import { ACHIEVEMENTS, SPECIAL_NAMES } from "@/game/config";
 import { logAchievement, logRun, saveProgress, ensureProgress } from "@/game/persistence";
+import { unlockAudio } from "@/game/sfx";
 
 export const Route = createFileRoute("/play")({
   head: () => ({
@@ -104,7 +105,11 @@ function PlayPage() {
     engineRef.current?.press(action, state);
 
   return (
-    <div className="min-h-screen bg-[#0a0418] text-white flex flex-col items-center select-none">
+    <div
+      className="min-h-screen bg-[#0a0418] text-white flex flex-col items-center select-none"
+      onPointerDown={() => unlockAudio()}
+      onKeyDown={() => unlockAudio()}
+    >
       <div className="w-full max-w-[800px] px-2 py-2 flex justify-between items-center">
         <Link to="/" className="text-sm text-purple-300 hover:text-white">← Menu</Link>
         <div className="text-xs text-purple-300">Estágio {stageIdx + 1} / 5</div>
@@ -279,7 +284,10 @@ function PlayPage() {
       )}
 
       <p className="text-[10px] text-purple-400 mt-2 px-3 text-center max-w-[800px]">
-        🎵 Música do estágio: <em>{boss?.song}</em> — adicione seus arquivos de áudio para tocá-los.
+        🎵 Música do estágio: <em>{boss?.song}</em>
+        {boss && !boss.musicUrl && (
+          <> — <span className="text-yellow-300">defina <code>musicUrl</code> em <code>src/game/config.ts</code> com a URL do seu MP3</span></>
+        )}
       </p>
 
       <audio ref={audioRef} muted={muted} preload="none" />
