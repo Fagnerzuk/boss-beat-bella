@@ -9,6 +9,10 @@ import spiderpunk from "@/assets/sprites/spiderpunk.png";
 import type { BossKey } from "./types";
 
 function load(src: string): HTMLImageElement {
+  if (typeof window === "undefined") {
+    // SSR: retorna um stub; sprites só são desenhados no browser.
+    return { complete: false, naturalWidth: 0, naturalHeight: 0, src } as unknown as HTMLImageElement;
+  }
   const img = new Image();
   img.src = src;
   return img;
