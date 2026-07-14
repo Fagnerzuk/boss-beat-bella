@@ -1,5 +1,7 @@
 import { BOSSES, SPECIAL_TO_ACHIEVEMENT } from "./config";
 import type { AchievementKey, BossConfig, SpecialKey } from "./types";
+import { SPRITES, drawSprite } from "./sprites";
+import { playHit } from "./sfx";
 
 export type GamePhase = "intro" | "combat" | "victory" | "defeat" | "ended";
 
@@ -228,6 +230,7 @@ export class GameEngine {
       this.bossEnt.hp -= dmg;
       this.bossEnt.hitFlash = 200;
       this.spawnHitFx(this.bossEnt.x + this.bossEnt.w/2, this.bossEnt.y + this.bossEnt.h/2, "#fff2a8", dmg);
+      playHit("boss");
       this.cb.onHpChange(this.player.hp, Math.max(0, this.bossEnt.hp), this.bossEnt.maxHp);
     }
   }
@@ -421,6 +424,7 @@ export class GameEngine {
     this.player.hp = Math.max(0, this.player.hp - dmg);
     this.player.hitFlash = 250;
     this.spawnHitFx(this.player.x + this.player.w/2, this.player.y + this.player.h/2, "#ff5c7a", dmg);
+    playHit("player");
     this.cb.onHpChange(this.player.hp, this.bossEnt.hp, this.bossEnt.maxHp);
   }
 
@@ -612,105 +616,61 @@ export class GameEngine {
   drawIronMan() {
     const ctx = this.ctx;
     const t = performance.now() / 500;
-    const x = WORLD_W - 90 + Math.sin(t) * 6;
-    const y = 60 + Math.cos(t) * 4;
-    // corpo vermelho
-    ctx.fillStyle = "#b71c1c";
-    ctx.fillRect(x, y + 10, 26, 26);
-    // capacete
-    ctx.fillStyle = "#d4a017";
-    ctx.fillRect(x + 4, y, 18, 14);
-    // olhos brilhando
-    ctx.fillStyle = "#e0f7ff";
-    ctx.fillRect(x + 7, y + 5, 4, 3);
-    ctx.fillRect(x + 15, y + 5, 4, 3);
-    // pernas
-    ctx.fillStyle = "#b71c1c";
-    ctx.fillRect(x + 4, y + 36, 8, 12);
-    ctx.fillRect(x + 14, y + 36, 8, 12);
-    // repulsor flames
-    ctx.fillStyle = "rgba(80,180,255,0.8)";
-    ctx.beginPath(); ctx.arc(x + 8, y + 50, 3 + Math.sin(t*4), 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + 18, y + 50, 3 + Math.cos(t*4), 0, Math.PI*2); ctx.fill();
-    // label
+    const x = WORLD_W - 110 + Math.sin(t) * 6;
+    const y = 40 + Math.cos(t) * 4;
+    const w = 70, h = 70;
+    // repulsor glow atrás
+    ctx.fillStyle = "rgba(80,180,255,0.35)";
+    ctx.beginPath(); ctx.arc(x + w/2, y + h - 4, 10 + Math.sin(t*4)*2, 0, Math.PI*2); ctx.fill();
+    drawSprite(ctx, SPRITES.ironman, x, y, w, h, -1);
     ctx.fillStyle = "#ffd54a";
-    ctx.font = "bold 8px system-ui";
+    ctx.font = "bold 9px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("IRON MAN", x + 13, y - 3);
+    ctx.fillText("IRON MAN", x + w/2, y - 3);
   }
 
   drawSpiderPunk() {
     const ctx = this.ctx;
     const t = performance.now() / 400;
-    const x = 40;
-    const y = 80;
-    // raios dos lados
+    const x = 20;
+    const y = 40;
+    const w = 70, h = 70;
+    // raios em volta
     ctx.strokeStyle = "#ffe600";
     ctx.lineWidth = 2;
     for (let i = 0; i < 3; i++) {
       const off = Math.sin(t + i) * 3;
       ctx.beginPath();
-      ctx.moveTo(x - 8, y + i*14 + off);
-      ctx.lineTo(x - 2, y + i*14 + 6 + off);
-      ctx.lineTo(x - 6, y + i*14 + 8 + off);
+      ctx.moveTo(x - 6, y + 10 + i*18 + off);
+      ctx.lineTo(x - 1, y + 16 + i*18 + off);
+      ctx.lineTo(x - 5, y + 18 + i*18 + off);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(x + 30, y + i*14 + off);
-      ctx.lineTo(x + 24, y + i*14 + 6 + off);
-      ctx.lineTo(x + 28, y + i*14 + 8 + off);
+      ctx.moveTo(x + w + 6, y + 10 + i*18 + off);
+      ctx.lineTo(x + w + 1, y + 16 + i*18 + off);
+      ctx.lineTo(x + w + 5, y + 18 + i*18 + off);
       ctx.stroke();
     }
-    // corpo preto com detalhes vermelhos (moicano)
-    ctx.fillStyle = "#0a0a0a";
-    ctx.fillRect(x, y + 8, 24, 30);
-    // moicano vermelho
+    drawSprite(ctx, SPRITES.spiderpunk, x, y, w, h, 1);
     ctx.fillStyle = "#ff1744";
-    ctx.fillRect(x + 10, y - 4, 4, 12);
-    ctx.fillRect(x + 8, y - 2, 8, 6);
-    // cabeça (máscara aranha)
-    ctx.fillStyle = "#1a1a1a";
-    ctx.fillRect(x + 4, y + 2, 16, 12);
-    // olhos brancos angulares
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(x + 6, y + 6, 5, 3);
-    ctx.fillRect(x + 13, y + 6, 5, 3);
-    // pernas
-    ctx.fillStyle = "#0a0a0a";
-    ctx.fillRect(x + 3, y + 38, 7, 10);
-    ctx.fillRect(x + 14, y + 38, 7, 10);
-    // label
-    ctx.fillStyle = "#ff1744";
-    ctx.font = "bold 8px system-ui";
+    ctx.font = "bold 9px system-ui";
     ctx.textAlign = "center";
-    ctx.fillText("SPIDER-PUNK", x + 12, y - 8);
+    ctx.fillText("SPIDER-PUNK", x + w/2, y - 3);
   }
 
   drawPlayer() {
     const ctx = this.ctx;
     const p = this.player;
     const flash = p.hitFlash > 0 && Math.floor(p.hitFlash/60) % 2 === 0;
-    // body (red jacket)
-    ctx.fillStyle = flash ? "#ffffff" : "#d8324b";
-    ctx.fillRect(p.x, p.y + 20, p.w, p.h - 30);
-    // legs
-    ctx.fillStyle = flash ? "#ffffff" : "#1a1a2e";
-    ctx.fillRect(p.x + 4, p.y + p.h - 12, 10, 12);
-    ctx.fillRect(p.x + p.w - 14, p.y + p.h - 12, 10, 12);
-    // head
-    ctx.fillStyle = flash ? "#ffffff" : "#f3c9a7";
-    ctx.fillRect(p.x + 6, p.y, p.w - 12, 22);
-    // hair (long black)
-    ctx.fillStyle = "#1a1a2e";
-    ctx.fillRect(p.x + 4, p.y - 2, p.w - 8, 8);
-    ctx.fillRect(p.x + 2, p.y + 4, 6, 18);
-    ctx.fillRect(p.x + p.w - 8, p.y + 4, 6, 18);
-    // eye direction
-    ctx.fillStyle = "#1a1a2e";
-    const ex = p.facing === 1 ? p.x + p.w - 12 : p.x + 8;
-    ctx.fillRect(ex, p.y + 10, 3, 3);
+    // sprite escalado — desenhado numa caixa maior que a hitbox para aparência
+    const bw = p.w + 24;
+    const bh = p.h + 12;
+    const bx = p.x - 12;
+    const by = p.y - 8;
+    drawSprite(ctx, SPRITES.bella, bx, by, bw, bh, p.facing, flash);
     // attack arc
     if (this.playerAttacking > 0) {
-      ctx.fillStyle = "rgba(255,255,255,0.6)";
+      ctx.fillStyle = "rgba(255,240,120,0.55)";
       const ax = p.facing === 1 ? p.x + p.w : p.x - 30;
       ctx.fillRect(ax, p.y + 20, 30, 16);
     }
@@ -725,56 +685,12 @@ export class GameEngine {
     const ctx = this.ctx;
     const b = this.bossEnt;
     const flash = b.hitFlash > 0 && Math.floor(b.hitFlash/60) % 2 === 0;
-    ctx.fillStyle = flash ? "#ffffff" : this.boss.color;
-    ctx.fillRect(b.x, b.y, b.w, b.h);
-    // accent (cape/details)
-    ctx.fillStyle = this.boss.accent;
-    ctx.fillRect(b.x + 6, b.y + 14, b.w - 12, 12);
-    // eyes
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(b.x + 10, b.y + 6, 6, 4);
-    ctx.fillRect(b.x + b.w - 16, b.y + 6, 6, 4);
-    // special details per boss
-    if (this.boss.key === "duende") {
-      // glider under boss
-      ctx.fillStyle = "#7a4dff";
-      ctx.beginPath();
-      ctx.moveTo(b.x - 14, b.y + b.h);
-      ctx.lineTo(b.x + b.w + 14, b.y + b.h);
-      ctx.lineTo(b.x + b.w/2, b.y + b.h + 10);
-      ctx.fill();
-    } else if (this.boss.key === "docock") {
-      // tentacles
-      ctx.strokeStyle = "#2f3b54";
-      ctx.lineWidth = 4;
-      for (let i = 0; i < 4; i++) {
-        const sx = b.x + (i < 2 ? 4 : b.w - 4);
-        const sy = b.y + 30 + (i%2)*10;
-        const ex = sx + (i < 2 ? -20 : 20) * b.facing;
-        const ey = sy + Math.sin(performance.now()/200 + i)*8;
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.lineTo(ex, ey);
-        ctx.stroke();
-      }
-    } else if (this.boss.key === "venom") {
-      // mouth
-      ctx.fillStyle = "#fff";
-      for (let i = 0; i < 5; i++) {
-        ctx.fillRect(b.x + 10 + i*6, b.y + 30, 4, 8);
-      }
-    } else if (this.boss.key === "kingpin") {
-      // suit collar white
-      ctx.fillStyle = "#fff";
-      ctx.fillRect(b.x + 14, b.y + 18, b.w - 28, 8);
-    } else if (this.boss.key === "mancha") {
-      // spots
-      ctx.fillStyle = "#0a0a0a";
-      ctx.beginPath(); ctx.arc(b.x + 14, b.y + 18, 5, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(b.x + 36, b.y + 32, 7, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(b.x + 20, b.y + 50, 6, 0, Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(b.x + 38, b.y + 64, 4, 0, Math.PI*2); ctx.fill();
-    }
+    const bw = b.w + 40;
+    const bh = b.h + 20;
+    const bx = b.x - 20;
+    const by = b.y - 12;
+    const img = SPRITES.bosses[this.boss.key];
+    drawSprite(ctx, img, bx, by, bw, bh, b.facing, flash);
     // name
     ctx.fillStyle = "#fff";
     ctx.font = "bold 10px system-ui";
