@@ -11,7 +11,8 @@ export const BOSSES: BossConfig[] = [
     damage: 8,
     attackCooldown: 1400,
     song: "Papercut — Linkin Park",
-    musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    // TODO: cole a URL do MP3 da fase (ou coloque o arquivo em /public e use "/musicas/duende.mp3")
+    musicUrl: "",
     tip: "Ele voa! Pule e ataque quando estiver passando por cima.",
     unlocksSpecial: "estrelar",
     intro: [
@@ -30,7 +31,7 @@ export const BOSSES: BossConfig[] = [
     damage: 12,
     attackCooldown: 1200,
     song: "Freak on a Leash — Korn",
-    musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    musicUrl: "",
     tip: "Os tentáculos têm alcance médio. Fique colado nele OU bem longe.",
     unlocksSpecial: "poderoso",
     intro: [
@@ -48,7 +49,7 @@ export const BOSSES: BossConfig[] = [
     damage: 10,
     attackCooldown: 1500,
     song: "Monster — Skillet",
-    musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    musicUrl: "",
     tip: "Cuidado com os saltos! Quando ele pula, role para o lado.",
     unlocksSpecial: "sentido_aranha",
     intro: [
@@ -66,7 +67,7 @@ export const BOSSES: BossConfig[] = [
     damage: 20,
     attackCooldown: 1500,
     song: "For Whom the Bell Tolls — Metallica",
-    musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+    musicUrl: "",
     tip: "Lento mas devastador. Ataque-acerte-recua, nunca fique parado perto.",
     unlocksSpecial: "resistente",
     intro: [
@@ -85,7 +86,7 @@ export const BOSSES: BossConfig[] = [
     damage: 14,
     attackCooldown: 900,
     song: "I'm Not a Vampire — Falling in Reverse",
-    musicUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+    musicUrl: "",
     tip: "Ele se teleporta! Fique de olho onde ele reaparece e ataque rápido.",
     intro: [
       { speaker: "boss", text: "Aqui... ali... em todo lugar!" },
