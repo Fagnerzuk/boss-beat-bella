@@ -424,6 +424,7 @@ export class GameEngine {
     this.player.hp = Math.max(0, this.player.hp - dmg);
     this.player.hitFlash = 250;
     this.spawnHitFx(this.player.x + this.player.w/2, this.player.y + this.player.h/2, "#ff5c7a", dmg);
+    playHit("player");
     this.cb.onHpChange(this.player.hp, this.bossEnt.hp, this.bossEnt.maxHp);
   }
 
