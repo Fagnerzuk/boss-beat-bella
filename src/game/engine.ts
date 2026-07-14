@@ -1,5 +1,7 @@
 import { BOSSES, SPECIAL_TO_ACHIEVEMENT } from "./config";
 import type { AchievementKey, BossConfig, SpecialKey } from "./types";
+import { SPRITES, drawSprite } from "./sprites";
+import { playHit } from "./sfx";
 
 export type GamePhase = "intro" | "combat" | "victory" | "defeat" | "ended";
 
