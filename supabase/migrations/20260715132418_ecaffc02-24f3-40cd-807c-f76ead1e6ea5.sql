@@ -1,0 +1,1 @@
+DELETE FROM public.leaderboard; DELETE FROM public.player_progress; DELETE FROM public.game_runs; DELETE FROM public.achievements;
