@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { MusicPlayerProvider } from "../game/music-player";
+import { MusicPlayerBar } from "../components/MusicPlayerBar";
 
 function NotFoundComponent() {
   return (
@@ -118,8 +120,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <MusicPlayerProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <div className="pb-20">
+          <Outlet />
+        </div>
+        <MusicPlayerBar />
+      </MusicPlayerProvider>
     </QueryClientProvider>
   );
 }
