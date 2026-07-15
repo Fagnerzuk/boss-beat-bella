@@ -96,16 +96,50 @@ export class GameEngine {
 
   firstBossDefeated = false;
 
+  bgCanvas: HTMLCanvasElement | null = null;
+
   constructor(canvas: HTMLCanvasElement, cb: GameCallbacks) {
     this.canvas = canvas;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("no 2d ctx");
     this.ctx = ctx;
     this.cb = cb;
+    this.buildBackground();
     this.bindKeys();
     this.loadStage(0);
     this.lastTs = performance.now();
     this.loop();
+  }
+
+  /** Renderiza o fundo estático (céu, prédios, janelas, chão) uma única vez
+   *  em um canvas offscreen. No loop desenhamos com um único drawImage. */
+  buildBackground() {
+    const off = typeof document !== "undefined" ? document.createElement("canvas") : null;
+    if (!off) return;
+    off.width = WORLD_W;
+    off.height = WORLD_H;
+    const ctx = off.getContext("2d");
+    if (!ctx) return;
+    const grad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
+    grad.addColorStop(0, "#1a1147");
+    grad.addColorStop(1, "#4b1d6e");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+    ctx.fillStyle = "#0d0626";
+    for (let i = 0; i < 10; i++) {
+      const w = 60 + (i * 37) % 50;
+      const h = 80 + (i * 53) % 120;
+      ctx.fillRect(i * 85, GROUND_Y - h, w, h);
+    }
+    ctx.fillStyle = "rgba(255,220,120,0.4)";
+    for (let i = 0; i < 60; i++) {
+      ctx.fillRect((i * 53) % WORLD_W, GROUND_Y - 30 - (i * 17) % 140, 4, 6);
+    }
+    ctx.fillStyle = "#1a0a2e";
+    ctx.fillRect(0, GROUND_Y, WORLD_W, WORLD_H - GROUND_Y);
+    ctx.fillStyle = "#39204d";
+    ctx.fillRect(0, GROUND_Y, WORLD_W, 4);
+    this.bgCanvas = off;
   }
 
   makePlayer(): Entity {
@@ -482,31 +516,12 @@ export class GameEngine {
   // --- Render ---
   draw() {
     const ctx = this.ctx;
-    // sky gradient
-    const grad = ctx.createLinearGradient(0, 0, 0, WORLD_H);
-    grad.addColorStop(0, "#1a1147");
-    grad.addColorStop(1, "#4b1d6e");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, WORLD_W, WORLD_H);
-
-    // distant city
-    ctx.fillStyle = "#0d0626";
-    for (let i = 0; i < 10; i++) {
-      const w = 60 + (i*37)%50;
-      const h = 80 + (i*53)%120;
-      ctx.fillRect(i*85, GROUND_Y - h, w, h);
+    if (this.bgCanvas) {
+      ctx.drawImage(this.bgCanvas, 0, 0);
+    } else {
+      ctx.fillStyle = "#1a1147";
+      ctx.fillRect(0, 0, WORLD_W, WORLD_H);
     }
-    // windows
-    ctx.fillStyle = "rgba(255,220,120,0.4)";
-    for (let i = 0; i < 60; i++) {
-      ctx.fillRect((i*53)%WORLD_W, GROUND_Y - 30 - (i*17)%140, 4, 6);
-    }
-
-    // ground
-    ctx.fillStyle = "#1a0a2e";
-    ctx.fillRect(0, GROUND_Y, WORLD_W, WORLD_H - GROUND_Y);
-    ctx.fillStyle = "#39204d";
-    ctx.fillRect(0, GROUND_Y, WORLD_W, 4);
 
     // NPCs de cenário
     this.drawIronMan();

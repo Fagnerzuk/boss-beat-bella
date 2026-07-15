@@ -13,4 +13,6 @@ export const PLAYLIST: Track[] = [
   { title: "For Whom the Bell Tolls", artist: "Metallica", url: "/musicas/bells.mp3" },
   { title: "I'm Not a Vampire", artist: "Falling in Reverse", url: "/musicas/vampire.mp3" },
   { title: "Sunflower", artist: "Post Malone & Swae Lee", url: "/musicas/sunflower.mp3" },
+  { title: "In the End", artist: "Linkin Park", url: "/musicas/intheend.mp3" },
+  { title: "Crawling", artist: "Linkin Park", url: "/musicas/crawling.mp3" },
 ];
