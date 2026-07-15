@@ -9,7 +9,7 @@ export const Route = createFileRoute("/")({
       { title: "Projeto Bella — Ação 2D" },
       { name: "description", content: "Enfrente os grandes chefões do crime em combates de arena 2D inspirados em Dan the Man." },
       { property: "og:title", content: "Projeto Bella — Ação 2D" },
-      { property: "og:description", content: "Enfrente os grandes chefões do crime em combates de arena 2D." },
+      { property: "og:description", content: "Enfrente os grandes chefões do crime em combates de arena 2D inspirados em Dan the Man." },
     ],
   }),
   component: Index,
