@@ -32,24 +32,8 @@ function PlayPage() {
   const [tip, setTip] = useState<string | null>(null);
   const [cheer, setCheer] = useState<{ speaker: "iron" | "punk"; text: string } | null>(null);
   const combatStartRef = useRef(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [muted, setMuted] = useState(false);
   const [debug, setDebug] = useState(false);
   const [bootError, setBootError] = useState<string | null>(null);
-
-  // Toca a música do estágio quando o combate começa
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio || !boss) return;
-    if (phase === "combat" && boss.musicUrl) {
-      if (audio.src !== boss.musicUrl) audio.src = boss.musicUrl;
-      audio.loop = true;
-      audio.volume = 0.35;
-      audio.play().catch(() => { /* autoplay pode ser bloqueado até 1º clique */ });
-    } else {
-      audio.pause();
-    }
-  }, [phase, boss]);
 
   useEffect(() => {
     ensureProgress();
@@ -284,20 +268,10 @@ function PlayPage() {
       )}
 
       <p className="text-[10px] text-purple-400 mt-2 px-3 text-center max-w-[800px]">
-        🎵 Música do estágio: <em>{boss?.song}</em>
-        {boss && !boss.musicUrl && (
-          <> — <span className="text-yellow-300">defina <code>musicUrl</code> em <code>src/game/config.ts</code> com a URL do seu MP3</span></>
-        )}
+        🎵 Trilha sonora no player abaixo — pule ou volte a música quando quiser.
       </p>
 
-      <audio ref={audioRef} muted={muted} preload="none" />
-      <div className="fixed bottom-3 right-3 flex flex-col gap-2">
-        <button
-          onClick={() => setMuted(m => !m)}
-          className="rounded-full bg-black/70 border border-purple-500 text-white px-3 py-2 text-xs"
-        >
-          {muted ? "🔇 Som" : "🔊 Som"}
-        </button>
+      <div className="fixed bottom-24 right-3 flex flex-col gap-2 z-30">
         <button
           onClick={() => { const on = engineRef.current?.toggleDebug() ?? false; setDebug(on); }}
           className={`rounded-full border px-3 py-2 text-xs ${debug ? "bg-[#00ff88] text-black border-[#00ff88]" : "bg-black/70 border-purple-500 text-white"}`}
