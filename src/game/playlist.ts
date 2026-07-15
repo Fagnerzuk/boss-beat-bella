@@ -7,7 +7,7 @@ export type Track = {
 // Coloque os MP3s em /public/musicas/ com estes nomes,
 // ou edite os campos `url` abaixo.
 export const PLAYLIST: Track[] = [
-  { title: "Papercut", artist: "Linkin Park", url: "/src/game/papercut.mp3" },
+  { title: "Papercut", artist: "Linkin Park", url: "/src/game/Papercut(MP3_160K).mp3" },
   { title: "Freak on a Leash", artist: "Korn", url: "/src/game/freak.mp3" },
   { title: "Monster", artist: "Skillet", url: "/src/game/monster.mp3" },
   { title: "For Whom the Bell Tolls", artist: "Metallica", url: "/src/game/bells.mp3" },
