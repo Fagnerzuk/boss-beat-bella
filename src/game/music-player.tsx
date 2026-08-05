@@ -40,7 +40,7 @@ function buildOrder(avoidFirst?: number): number[] {
 
 export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [order, setOrder] = useState<number[]>(() => buildOrder());
+  const [order, setOrder] = useState<number[]>(() => PLAYLIST.map((_, i) => i));
   const [pos, setPos] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(0.5);
@@ -49,6 +49,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    setOrder(buildOrder());
     const v = Number(localStorage.getItem(LS_VOLUME));
     if (!Number.isNaN(v) && v >= 0 && v <= 1) setVolumeState(v);
   }, []);
