@@ -6,9 +6,9 @@ import { BOSSES } from "@/game/config";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Projeto Bella — Ação 2D" },
+      { title: "PROJECT: SPIDER-BELLA" },
       { name: "description", content: "Enfrente os grandes chefões do crime em combates de arena 2D inspirados em Dan the Man." },
-      { property: "og:title", content: "Projeto Bella — Ação 2D" },
+      { property: "og:title", content: "PROJECT: SPIDER-BELLA" },
       { property: "og:description", content: "Enfrente os grandes chefões do crime em combates de arena 2D inspirados em Dan the Man." },
     ],
   }),
@@ -30,7 +30,7 @@ function Index() {
       <div className="mx-auto max-w-3xl px-6 py-12">
         <header className="text-center">
           <h1 className="text-5xl md:text-7xl font-black tracking-tight text-[#ff3859] drop-shadow-[0_0_20px_rgba(255,56,89,0.5)]">
-            PROJETO BELLA
+            PROJECT:<br />SPIDER-BELLA
           </h1>
           <p className="mt-3 text-lg text-purple-200">Ação 2D · Cinco chefões · Uma heroína</p>
         </header>
