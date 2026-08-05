@@ -44,6 +44,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   const [pos, setPos] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(0.5);
+  const startedRef = useRef(false);
 
   const index = order[pos] ?? 0;
 
@@ -94,6 +95,42 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   }, [order.length]);
 
   const setVolume = useCallback((v: number) => setVolumeState(Math.max(0, Math.min(1, v))), []);
+
+  // Navegadores bloqueiam autoplay: tenta tocar já e, se falhar,
+  // inicia na primeira interação do usuário (clique/tecla/toque).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const a = audioRef.current;
+    if (!a) return;
+
+    const start = () => {
+      if (startedRef.current) return;
+      const el = audioRef.current;
+      if (!el) return;
+      if (!el.src) el.src = PLAYLIST[index].url;
+      el.volume = volume;
+      el.play()
+        .then(() => {
+          startedRef.current = true;
+          setIsPlaying(true);
+          remove();
+        })
+        .catch(() => {});
+    };
+
+    const remove = () => {
+      window.removeEventListener("pointerdown", start);
+      window.removeEventListener("keydown", start);
+      window.removeEventListener("touchstart", start);
+    };
+
+    start();
+    window.addEventListener("pointerdown", start);
+    window.addEventListener("keydown", start);
+    window.addEventListener("touchstart", start);
+    return remove;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value = useMemo<Ctx>(
     () => ({
