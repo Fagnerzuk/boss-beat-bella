@@ -57,11 +57,11 @@ function Index() {
           <h2 className="text-2xl font-bold text-purple-200">Os chefões</h2>
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {BOSSES.map((b, i) => (
-              <div key={b.key} className="flex items-center gap-3 rounded-xl border border-purple-700/30 bg-black/30 p-3">
-                <div className="h-10 w-10 rounded" style={{ background: b.color, boxShadow: `0 0 12px ${b.color}88` }} />
+              <div key={b.key} className="flex items-start gap-3 rounded-xl border border-purple-700/30 bg-black/30 p-3">
+                <div className="mt-0.5 h-10 w-10 shrink-0 rounded" style={{ background: b.color, boxShadow: `0 0 12px ${b.color}88` }} />
                 <div>
                   <div className="font-bold">{i+1}. {b.name}</div>
-                  <div className="text-xs text-purple-300">{b.song}</div>
+                  <p className="text-xs text-purple-300">{b.desc}</p>
                 </div>
               </div>
             ))}
